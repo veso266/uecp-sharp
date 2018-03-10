@@ -27,12 +27,12 @@ using System.Net.Sockets;
 
 namespace UECP
 {
-    public interface Endpoint
+    public interface UDPEndpoint
     {
         void SendData(byte[] data);
     }
 
-    public class UDPSimplexEndpoint : Endpoint
+    public class UDPSimplexEndpoint : UDPEndpoint
     {
         private UdpClient _udpClient;
 
@@ -45,6 +45,25 @@ namespace UECP
         public void SendData(byte[] data)
         {
             _udpClient.Send(data, data.Length);
+        }
+    }
+    public interface TCPEndpoint
+    {
+        void SendData(byte[] data);
+    }
+    public class TCPSimplexEndpoint : TCPEndpoint
+    {
+        private TcpClient _tcpClient;
+        private NetworkStream TCPStream;
+        public TCPSimplexEndpoint(string encoderAddress, int encoderPort)
+        {
+            _tcpClient = new TcpClient(IPAddress.Parse(encoderAddress).ToString(), encoderPort);
+            //_tcpClient.Connect(IPAddress.Parse(encoderAddress), encoderPort);
+        }
+        public void SendData(byte[] data)
+        {
+            TCPStream = _tcpClient.GetStream();
+            TCPStream.Write(data, 0, data.Length);
         }
     }
 }

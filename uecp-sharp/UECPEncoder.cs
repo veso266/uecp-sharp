@@ -31,13 +31,36 @@ namespace UECP
 {
     public class UECPEncoder
     {
-        Endpoint _endpoint;
+        UDPEndpoint _endpoint;
+        TCPEndpoint _TCPendpoint;
+        private string consCheck = "";
 
-        public UECPEncoder(Endpoint ep)
+        public UECPEncoder(TCPEndpoint ep)
+        {
+            _TCPendpoint = ep;
+            constructorCheck("TCP");
+        }
+        public UECPEncoder(UDPEndpoint ep)
         {
             _endpoint = ep;
+            constructorCheck("UDP");
         }
 
+        //Checking which Class Constructor is used
+        public void constructorCheck(string inputCheck)
+        {
+            string tell = "";
+            if (inputCheck == "TCP")
+            {
+                consCheck = "TCP";
+            }
+            if (inputCheck == "UDP")
+            {
+                consCheck = "UDP";
+            }
+            //return tell;
+        }
+        //Checking which Class Constructor is used
         public void SetPI(UInt16 pi)
         {
             BuildAndSendMessage(MEC.RDS_PI, BitConverter.GetBytes(pi));
@@ -117,8 +140,17 @@ namespace UECP
         {
             UECPFrame uecpFrame = new UECPFrame();
             uecpFrame.MessageElements.Add(messageElement);
-
-            _endpoint.SendData(uecpFrame.GetBytes());
+            //We have to check which constructor is used (TCP or UDP)
+            if (consCheck == "UDP")
+            {
+                _endpoint.SendData(uecpFrame.GetBytes());
+            }
+            else if (consCheck == "TCP")
+            {
+                _TCPendpoint.SendData(uecpFrame.GetBytes());
+            }
+            //We have to check which constructor is used (TCP or UDP)
+            
         }
 
         private void FillBytes(List<byte> data, byte fillWith, int desiredLength)
